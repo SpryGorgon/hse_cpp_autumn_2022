@@ -10,7 +10,7 @@ protected:
 	void TearDown() {}
 };
 
-// Две одинаковые матрицы
+// Конструкторы, умножение, сложение, вывод в поток
 TEST(TestUtils, test_1)
 {
 	BigInt a = 1;
@@ -21,7 +21,7 @@ TEST(TestUtils, test_1)
 	ASSERT_EQ(ss.str(), "123456789012345678901234567892");
 }
 
-// Третий элеммент ([0][2]) = 3
+// Перемещающий конструктор
 TEST(TestUtils, test_2)
 {
 	BigInt a = 1;
@@ -34,7 +34,7 @@ TEST(TestUtils, test_2)
 	ASSERT_EQ(ss.str(), "123456789012345678901234567892");
 }
 
-// Третий элеммент ([0][2]) = 3
+// Сложение после перемещающего конструктора
 TEST(TestUtils, test_3)
 {
 	BigInt a = 1;
@@ -48,7 +48,7 @@ TEST(TestUtils, test_3)
 	ASSERT_EQ(ss.str(), "246913578024691357802469135782");
 }
 
-// Третий элеммент ([0][2]) = 3
+// Сложение
 TEST(TestUtils, test_4)
 {
 	BigInt a = 99;
@@ -59,7 +59,7 @@ TEST(TestUtils, test_4)
 	ASSERT_EQ(ss.str(), "123456789012345678901234567989");
 }
 
-// Третий элеммент ([0][2]) = 3
+// Сравнение чисел на равенство
 TEST(TestUtils, test_5)
 {
 	BigInt a = 99;
@@ -69,7 +69,7 @@ TEST(TestUtils, test_5)
 	ASSERT_EQ(c == d, true);
 }
 
-// Третий элеммент ([0][2]) = 3
+// Вычитание с отрицательным рещультатом
 TEST(TestUtils, test_6)
 {
 	BigInt a = 1;
@@ -80,7 +80,7 @@ TEST(TestUtils, test_6)
 	ASSERT_EQ(ss.str(), "-123456789012345678901234567889");
 }
 
-// Третий элеммент ([0][2]) = 3
+// Вычитание с положительным результатом
 TEST(TestUtils, test_7)
 {
 	BigInt a = 1;
@@ -91,7 +91,7 @@ TEST(TestUtils, test_7)
 	ASSERT_EQ(ss.str(), "123456789012345678901234567889");
 }
 
-// Третий элеммент ([0][2]) = 3
+// Сравнение <
 TEST(TestUtils, test_8)
 {
 	BigInt a = 1;
@@ -99,7 +99,7 @@ TEST(TestUtils, test_8)
 	ASSERT_EQ(a < b, true);
 }
 
-// Третий элеммент ([0][2]) = 3
+// Сравнение <=
 TEST(TestUtils, test_9)
 {
 	BigInt a = 1;
@@ -107,7 +107,7 @@ TEST(TestUtils, test_9)
 	ASSERT_EQ(a <= b, true);
 }
 
-// Третий элеммент ([0][2]) = 3
+// Сравнение ==
 TEST(TestUtils, test_10)
 {
 	BigInt a = 1;
@@ -115,40 +115,32 @@ TEST(TestUtils, test_10)
 	ASSERT_EQ(a == b, false);
 }
 
-// Третий элеммент ([0][2]) = 3
+// Сравнение !=
 TEST(TestUtils, test_11)
-{
-	BigInt a = 1;
-	BigInt b("123456789012345678901234567890");
-	ASSERT_EQ(a < b, true);
-}
-
-// Третий элеммент ([0][2]) = 3
-TEST(TestUtils, test_12)
 {
 	BigInt a = 1;
 	BigInt b("123456789012345678901234567890");
 	ASSERT_EQ(a != b, true);
 }
 
-// Третий элеммент ([0][2]) = 3
-TEST(TestUtils, test_13)
+// Сравнение >=
+TEST(TestUtils, test_12)
 {
 	BigInt a = 1;
 	BigInt b("123456789012345678901234567890");
 	ASSERT_EQ(a >= b, false);
 }
 
-// Третий элеммент ([0][2]) = 3
-TEST(TestUtils, test_14)
+// Сравнение >
+TEST(TestUtils, test_13)
 {
 	BigInt a = 1;
 	BigInt b("123456789012345678901234567890");
 	ASSERT_EQ(a > b, false);
 }
 
-// Третий элеммент ([0][2]) = 3
-TEST(TestUtils, test_15)
+// Унарный минус
+TEST(TestUtils, test_14)
 {
 	BigInt a("123456789012345678901234567890");
 	std::stringstream ss;
