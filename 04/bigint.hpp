@@ -4,7 +4,7 @@
 class BigInt
 {
 private:
-	size_t size, capacity, base = 100;
+	size_t size;
 	int32_t* data;
 	bool neg;
 private:
@@ -14,6 +14,8 @@ private:
 	static BigInt mul(const BigInt& a, const int32_t b, size_t n_zeros = 0);
 	static bool dataEquals(const BigInt& a, const BigInt& b);
 	static bool dataLower(const BigInt& a, const BigInt& b);
+public:
+	static const size_t base = 10000, base_len = 4;
 public:
 	BigInt();
 	BigInt(int32_t n);

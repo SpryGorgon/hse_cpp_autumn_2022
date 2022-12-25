@@ -15,21 +15,21 @@ BigInt BigInt::add(const BigInt& a, const BigInt& b)
 	while (i < a.size && j < b.size)
 	{
 		int32_t x = a.data[i] + b.data[j] + (hold ? 1 : 0);
-		hold = x / 100;
-		ans = std::to_string(x % 100) + ans;
+		hold = x / base;
+		ans = std::to_string(x % base) + ans;
 		i++; j++;
 	}
 	for (; i < a.size; i++)
 	{
 		int32_t x = a.data[i] + (hold ? 1 : 0);
-		hold = x / 100;
-		ans = std::to_string(x % 100) + ans;
+		hold = x / base;
+		ans = std::to_string(x % base) + ans;
 	}
 	for (; j < b.size; j++)
 	{
 		int32_t x = b.data[j] + (hold ? 1 : 0);
-		hold = x / 100;
-		ans = std::to_string(x % 100) + ans;
+		hold = x / base;
+		ans = std::to_string(x % base) + ans;
 	}
 	if (hold) ans = "1" + ans;
 	return BigInt(ans);
@@ -43,20 +43,20 @@ BigInt BigInt::subs(const BigInt& a, const BigInt& b)
 	{
 		int32_t x = a.data[i] - b.data[j] - (hold ? 1 : 0);
 		hold = (x < 0 ? true : false);
-		ans = std::to_string((x + 100) % 100) + ans;
+		ans = std::to_string((x + base) % base) + ans;
 		i++; j++;
 	}
 	for (; i < a.size; i++)
 	{
 		int32_t x = a.data[i] - (hold ? 1 : 0);
 		hold = (x < 0 ? true : false);
-		ans = std::to_string((x + 100) % 100) + ans;
+		ans = std::to_string((x + base) % base) + ans;
 	}
 	for (; j < b.size; j++)
 	{
 		int32_t x = b.data[j] - (hold ? 1 : 0);
 		hold = (x < 0 ? true : false);
-		ans = std::to_string((x + 100) % 100) + ans;
+		ans = std::to_string((x + base) % base) + ans;
 	}
 	if (hold) throw std::runtime_error("abs(a) < abs(b)");
 	return BigInt(ans);
@@ -70,8 +70,8 @@ BigInt BigInt::mul(const BigInt& a, const int32_t b, size_t n_zeros)
 	{
 		int32_t x = a.data[i] + hold;
 		x *= b;
-		hold = x / 100;
-		ans = std::to_string(x % 100) + ans;
+		hold = x / base;
+		ans = std::to_string(x % base) + ans;
 		i++;
 	}
 	if (hold) ans = std::to_string(hold) + ans;
@@ -97,53 +97,53 @@ bool BigInt::dataLower(const BigInt& a, const BigInt& b)
 	}
 	return false;
 }
-BigInt::BigInt() : size(1), capacity(1), data(new int32_t[1]), neg(false) { data[0] = 0; }
+BigInt::BigInt() : size(1), data(new int32_t[1]), neg(false) { data[0] = 0; }
 BigInt::BigInt(int32_t n)
 {
-	size = (std::to_string(abs(n)).size() + 1) / 2;
-	capacity = size;
-	data = new int32_t[capacity];
+	size = (std::to_string(abs(n)).size() + base_len - 1) / base_len;
+	data = new int32_t[size];
 	data[0] = 0;
 	neg = ((n < 0) ? true : false);
 	size_t i = 0;
 	n = abs(n);
 	while (n > 0)
 	{
-		data[i] = n % 100;
-		n /= 100;
+		data[i] = n % base;
+		n /= base;
 		i++;
 	}
 }
 BigInt::BigInt(const std::string& s)
 {
-	if (s.size() > 0 && s[0] == '-') size = s.size() / 2;
-	else size = (s.size() + 1) / 2;
-	capacity = size;
-	data = new int32_t[capacity];
-	data[0] = 0;
-
+	size_t base_len = BigInt::base_len;
+	std::string cur;
 	if (s.size() > 0 && s[0] == '-')
 	{
+		size = (s.size() + base_len - 2) / base_len;
 		neg = true;
-		for (size_t i = 1; i <= size; i++)
-		{
-			data[size - i] = std::stoi(s.substr(i * 2 - 1, 2));
-		}
+		cur = s.substr(1);
 	}
 	else
 	{
+		size = (s.size() + base_len - 1) / base_len;
 		neg = false;
-		for (size_t i = 0; i < size; i++)
-		{
-			data[size - 1 - i] = std::stoi(s.substr(i * 2, 2));
-		}
+		cur = s;
+	}
+	data = new int32_t[size];
+	data[0] = 0;
+
+	for (size_t i = 0; i < size; i++)
+	{
+		size_t offset = ((cur.size() > (i + 1) * base_len) ? (cur.size() - (i + 1) * base_len) : 0);
+		size_t len = std::min(base_len, cur.size() - i * base_len);
+		data[i] = std::stoi(cur.substr(offset, len));
 	}
 }
-BigInt::BigInt(const BigInt& other) : size(other.size), capacity(other.capacity), data(new int32_t[other.capacity]), neg(other.neg)
+BigInt::BigInt(const BigInt& other) : size(other.size), data(new int32_t[other.size]), neg(other.neg)
 {
 	for (size_t i = 0; i < other.size; i++) data[i] = other.data[i];
 }
-BigInt::BigInt(BigInt&& other) : size(other.size), capacity(other.capacity), neg(other.neg)
+BigInt::BigInt(BigInt&& other) : size(other.size), neg(other.neg)
 {
 	data = other.data;
 	other.data = nullptr;
@@ -157,9 +157,8 @@ BigInt& BigInt::operator=(const BigInt& other)
 	if (this == &other) return*this;
 	destroy();
 	size = other.size;
-	capacity = other.capacity;
 	neg = other.neg;
-	data = new int32_t[capacity];
+	data = new int32_t[size];
 	for (size_t i = 0; i < size; i++) data[i] = other.data[i];
 	return *this;
 }
@@ -168,7 +167,6 @@ BigInt& BigInt::operator=(BigInt&& other)
 	if (this == &other) return*this;
 	destroy();
 	size = other.size;
-	capacity = other.capacity;
 	neg = other.neg;
 	data = other.data;
 	other.data = nullptr;
