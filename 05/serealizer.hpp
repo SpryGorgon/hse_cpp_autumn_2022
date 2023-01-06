@@ -13,7 +13,7 @@ enum class Error
 
 class Serializer
 {
-	static constexpr char Separator = '\n';
+	static constexpr char Separator = ' ';
 	std::ostream& out_;
 public:
 	explicit Serializer(std::ostream& out);

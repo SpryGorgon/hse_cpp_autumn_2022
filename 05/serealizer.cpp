@@ -19,11 +19,14 @@ Error Serializer::operator()(ArgsT... args)
 }
 Error Serializer::process(bool&& arg)
 {
-	return process_(std::move(arg));
+
+	out_ << std::boolalpha << arg;
+	return Error::NoError;
 }
 Error Serializer::process(uint64_t&& arg)
 {
-	return process_(std::move(arg));
+	out_ << arg;
+	return Error::NoError;
 }
 
 Error Serializer::process()
@@ -34,20 +37,8 @@ Error Serializer::process()
 template<class T, class... Args>
 Error Serializer::process(T&& val, Args&&... args)
 {
-	auto ans = process_(std::move(val));
-	if (ans != Error::NoError) return ans;
+	out_ << std::boolalpha << val << Separator;
 	return process(std::forward<Args>(args)...);
-}
-
-Error Serializer::process_(bool&& arg)
-{
-	out_ << std::boolalpha << arg << Separator;
-	return Error::NoError;
-}
-Error Serializer::process_(uint64_t&& arg)
-{
-	out_ << arg << Separator;
-	return Error::NoError;
 }
 
 
@@ -114,9 +105,9 @@ Error Deserializer::process_(uint64_t& arg)
 	return Error::NoError;
 }
 
-template 
+template
 Error Serializer::save(Data&);
-template 
+template
 Error Deserializer::load(Data&);
 
 
