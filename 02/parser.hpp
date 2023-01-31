@@ -31,5 +31,5 @@ public:
 
     // Тут другие методы для установки callback-функций.
     //...
-    T Parse(const std::string&);
+    void Parse(const std::string&);
 };

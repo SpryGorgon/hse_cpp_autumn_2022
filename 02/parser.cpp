@@ -52,10 +52,9 @@ void TokenParser<T>::SetStringTokenCallback(FooPtr<std::string,T> f)
 //...
 
 template<typename T>
-T TokenParser<T>::Parse(const std::string& tokens)
+void TokenParser<T>::Parse(const std::string& tokens)
 {
-	T ans = T();
-	if (startCallback != nullptr) ans += startCallback();
+	if (startCallback != nullptr) startCallback();
 	std::istringstream iss(tokens);
 	std::string s_;
 	while (iss >> s_)
@@ -71,15 +70,15 @@ T TokenParser<T>::Parse(const std::string& tokens)
 			std::istringstream iss(s);
 			iss >> n;
 			if (ind != std::string::npos && s[ind] == '-') throw std::runtime_error("negative value");
-			if (digitCallback != nullptr) ans += digitCallback(n);
+			if (digitCallback != nullptr) digitCallback(n);
 		}
 		catch (...)
 		{
-			if (stringCallback != nullptr) ans += stringCallback(s_);
+			if (stringCallback != nullptr) stringCallback(s_);
 		}
 	}
-	if (endCallback != nullptr) ans += endCallback();
-	return ans;
+	if (endCallback != nullptr) endCallback();
 }
 
 template class TokenParser<std::string>;
+template class TokenParser<void>;

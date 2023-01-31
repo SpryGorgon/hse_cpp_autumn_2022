@@ -10,145 +10,208 @@ protected:
 	void TearDown() {}
 };
 
-using T = std::string;
-template class TokenParser<std::string>;
+using T = void;
+template class TokenParser<T>;
 
-T dc(const uint64_t& n)
+std::string parsed_line = "";
+
+T dc(const uint64_t&)
 {
-	(void)n;
-	return "n";
+	parsed_line += "n";
+	return;
 }
-T sc(const std::string& s)
+T sc(const std::string&)
 {
-	(void)s;
-	return "s";
+	parsed_line += "s";
+	return;
 }
 
 T startCallback()
 {
-	return "start\n";
+	parsed_line += "start\n";
+	return;
 }
 
 T endCallback()
 {
-	return "\nend";
+	parsed_line += "\nend";
+	return;
 }
 
 // Нет токенов
 TEST(TestUtils, test_1)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
 	std::string line = "";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "");
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "");
 }
 
-// Число
+// Пробел
 TEST(TestUtils, test_2)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
-	std::string line = "1";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "n");
+	std::string line = " ";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "");
 }
 
-// Не число, а строка, т.к. uint64_t не поддерживает отрицательные числа
+// Пробельные символы
 TEST(TestUtils, test_3)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
-	std::string line = "-1";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "s");
+	std::string line = " \t\n\r\t\n \t \r";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "");
 }
 
-// Строка
+// Число
 TEST(TestUtils, test_4)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
-	std::string line = "a";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "s");
+	std::string line = "1";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "n");
 }
 
-// Число 0
+// Число, но без соответствующего callback-а
 TEST(TestUtils, test_5)
 {
 	TokenParser<T> parser;
-	parser.SetDigitTokenCallback(dc);
+	parsed_line = "";
+	parser.SetDigitTokenCallback(nullptr);
 	parser.SetStringTokenCallback(sc);
-	std::string line = "000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "n");
+	std::string line = "1";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "");
 }
 
-// Число 1 с большим количеством незначащих нулей
+// Не число, а строка, т.к. uint64_t не поддерживает отрицательные числа
 TEST(TestUtils, test_6)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
-	std::string line = "00000000000000000000000000000000000000000000000000000000000000001";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "n");
+	std::string line = "-1";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "s");
 }
 
-// Строка, т.к. не поместится в uint64_t
+// Строка
 TEST(TestUtils, test_7)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
+	parser.SetDigitTokenCallback(dc);
+	parser.SetStringTokenCallback(sc);
+	std::string line = "a";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "s");
+}
+
+// Строка, но без соответствующего callback-а
+TEST(TestUtils, test_8)
+{
+	TokenParser<T> parser;
+	parsed_line = "";
+	parser.SetDigitTokenCallback(dc);
+	parser.SetStringTokenCallback(nullptr);
+	std::string line = "a";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "");
+}
+
+// Число 0
+TEST(TestUtils, test_9)
+{
+	TokenParser<T> parser;
+	parsed_line = "";
+	parser.SetDigitTokenCallback(dc);
+	parser.SetStringTokenCallback(sc);
+	std::string line = "000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "n");
+}
+
+// Число 1 с большим количеством незначащих нулей
+TEST(TestUtils, test_10)
+{
+	TokenParser<T> parser;
+	parsed_line = "";
+	parser.SetDigitTokenCallback(dc);
+	parser.SetStringTokenCallback(sc);
+	std::string line = "00000000000000000000000000000000000000000000000000000000000000001";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "n");
+}
+
+// Строка, т.к. не поместится в uint64_t
+TEST(TestUtils, test_11)
+{
+	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
 	std::string line = "000000010000000000000000000000000000000000000000000000000000000000000000000000000";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "s");
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "s");
 }
 
 
 // Строка, т.к. в конце буква
-TEST(TestUtils, test_8)
+TEST(TestUtils, test_12)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
 	std::string line = "32793274627292r";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "s");
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "s");
 }
 
 // Число - максимальное, помещающееся в uint64_t
-TEST(TestUtils, test_9)
+TEST(TestUtils, test_13)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
 	std::string line = "18446744073709551615";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "n");
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "n");
 }
 
 // Строка, т.к. число на 1 больше, чем максимальное для uint64_t
-TEST(TestUtils, test_10)
+TEST(TestUtils, test_14)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
 	std::string line = "18446744073709551616";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "s");
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "s");
 }
 
 // Все токены из предыдущих тестов. Также вызывается callback в начале и в конце
-TEST(TestUtils, test_11)
+TEST(TestUtils, test_15)
 {
 	TokenParser<T> parser;
+	parsed_line = "";
 	parser.SetDigitTokenCallback(dc);
 	parser.SetStringTokenCallback(sc);
 	parser.SetStartCallback(startCallback);
@@ -157,8 +220,25 @@ TEST(TestUtils, test_11)
 	line += "00000000000000000000000000000000000000000000000000000000000000001\t";
 	line += "000000010000000000000000000000000000000000000000000000000000000000000000000000000\r";
 	line += "32793274627292r 18446744073709551615 18446744073709551616";
-	T ans = parser.Parse(line);
-	ASSERT_EQ(ans, "start\nnssnnssns\nend");
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "start\nnssnnssns\nend");
+}
+
+// Все токены из предыдущих тестов, но все callback-и nullptr
+TEST(TestUtils, test_16)
+{
+	TokenParser<T> parser;
+	parsed_line = "";
+	parser.SetDigitTokenCallback(nullptr);
+	parser.SetStringTokenCallback(nullptr);
+	parser.SetStartCallback(nullptr);
+	parser.SetEndCallback(nullptr);
+	std::string line = "1 -1 a 000000000000000000000000000000000000000000000000000000000000000000000000000000000\n";
+	line += "00000000000000000000000000000000000000000000000000000000000000001\t";
+	line += "000000010000000000000000000000000000000000000000000000000000000000000000000000000\r";
+	line += "32793274627292r 18446744073709551615 18446744073709551616";
+	parser.Parse(line);
+	ASSERT_EQ(parsed_line, "");
 }
 
 int main(int argc, char** argv)
