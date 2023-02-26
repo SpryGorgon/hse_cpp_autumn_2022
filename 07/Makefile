@@ -1,0 +1,17 @@
+CC=g++
+FLAGS=-std=c++2a -Wall -pedantic -Werror -Wextra
+TEST_LIB=-lgtest -lgtest_main -lpthread
+
+all: avl test_bin
+
+avl: avl.cpp avl.hpp
+	$(CC) $(FLAGS) -c avl.cpp
+
+test_bin: avl.o avl.hpp tests.cpp
+	$(CC) $(FLAGS) avl.o tests.cpp -o test_bin $(TEST_LIB)
+
+test:
+	./test_bin
+
+clean:
+	rm -f *.o test_bin
